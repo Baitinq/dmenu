@@ -1,0 +1,11 @@
+#!/bin/bash -e
+
+if ! git remote | grep -x suckless; then
+    git remote add suckless git://git.suckless.org/dmenu
+fi
+
+# back up, since we are rewriting history
+git branch "$(date +%Y%m%d%H%M%S%N)"
+
+git fetch -p suckless
+git rebase -p suckless/master

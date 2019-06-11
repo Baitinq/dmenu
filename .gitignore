@@ -1,0 +1,4 @@
+*.orig
+*.rej
+*.o
+dmenu_run
