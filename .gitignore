@@ -1,4 +1,4 @@
 *.orig
 *.rej
 *.o
-dmenu_run
+dmenu
