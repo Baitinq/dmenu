@@ -1,0 +1,31 @@
+Index: dmenu-patches/dmenu/dmenu.c
+===================================================================
+--- dmenu-patches.orig/dmenu/dmenu.c
++++ dmenu-patches/dmenu/dmenu.c
+@@ -49,7 +49,7 @@ static struct item *matches, *matchend;
+ static struct item *prev, *curr, *next, *sel;
+ static int mon = -1, screen;
+ 
+-static Atom clip, utf8;
++static Atom clip, utf8, type, dock;
+ static Display *dpy;
+ static Window root, parentwin, win;
+ static XIC xic;
+@@ -690,6 +690,8 @@ setup(void)
+ 
+ 	clip = XInternAtom(dpy, "CLIPBOARD",   False);
+ 	utf8 = XInternAtom(dpy, "UTF8_STRING", False);
++	type = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
++	dock = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
+ 
+ 	/* calculate menu geometry */
+ 	bh = drw->fonts->h + 2;
+@@ -747,6 +749,8 @@ setup(void)
+ 	                    CopyFromParent, CopyFromParent, CopyFromParent,
+ 	                    CWOverrideRedirect | CWBackPixel | CWEventMask, &swa);
+ 	XSetClassHint(dpy, win, &ch);
++	XChangeProperty(dpy, win, type, XA_ATOM, 32, PropModeReplace,
++			(unsigned char *) &dock, 1);
+ 
+ 	/* open input methods */
+ 	xim = XOpenIM(dpy, NULL, NULL, NULL);
