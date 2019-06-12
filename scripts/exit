@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# a simple dmenu session script
+#
+###
+
+DMENU='dmenu'
+choice=$(echo -e "suspend\nhibernate\nshutdown\nreboot" | $DMENU)
+
+case "$choice" in
+  suspend) systemctl suspend & ;;
+  hibernate) systemctl hibernate & ;;
+  shutdown) systemctl shutdown -h now & ;;
+  reboot) systemctl reboot & ;;
+esac
