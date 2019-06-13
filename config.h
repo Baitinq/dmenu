@@ -7,8 +7,8 @@ static const char *fonts[] = {
 	"Noto Sans Display Nerd Font:size=10"
 };
 
-static char *name = "dmenu";
-static char *class = "Dmenu";
+static char *name = "dmenu";   /* -n  option; */
+static char *class = "Dmenu";  /* -c  option; */
 
 static const char *prompt      = NULL;      /* -p  option; prompt to the left of input field */
 
@@ -20,7 +20,7 @@ static const char col_cyan[]        = "#005577";
 static const char col_black[]       = "#000000";
 static const char col_aqua[]        = "#00ffff";
 
-static double opacity = 1.0;
+static double opacity = 1.0;         /* -o  option; 0 being transparent and 1 being opaque */
 
 static const char *colors[SchemeLast][2] = {
 	/*                  fg          bg    */
