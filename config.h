@@ -31,10 +31,10 @@ static const char *colors[SchemeLast][2] = {
 };
 
 static const unsigned int alphas[][2]      = {
-	/*                 fg       bg    */
-	[SchemeNorm] = { OPAQUE, baralpha },
-	[SchemeSel]  = { OPAQUE, baralpha },
-	[SchemeOut]  = { OPAQUE, baralpha },
+	/*                 fg      bg   */
+	[SchemeNorm] = { OPAQUE, OPAQUE },
+	[SchemeSel]  = { OPAQUE, OPAQUE },
+	[SchemeOut]  = { OPAQUE, OPAQUE },
 };
 /* -l option; if nonzero, dmenu uses vertical list with given number of lines */
 static unsigned int lines      = 0;
