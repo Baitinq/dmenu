@@ -29,8 +29,8 @@
 IMG_PATH=$HOME/Images
 FILEMASK=%Y-%m-%d-@%H-%M-%S-screenshot.png
 RES=1920x1080   #set your screen resolution
-TIME=3          #How long will notifications be visible?
-COUNTER=3       #Seconds to count for delay
+TIME=3000       #How long will notifications be visible (ms)?
+COUNTER=3000    #Ms to count for delay
 
 ################## Configuration End ##############################
 
@@ -48,14 +48,13 @@ prog="
 cmd=$(dmenu -l 10 -p 'Choose Screenshot Type' <<< "$prog")
 
 (( rounded_num= ($COUNTER + (2 - 1) / 2))) #round the number
-((final_rounded_num = $rounded_num * 1000 )) #convert to seconds
 
 cd $IMG_PATH
 case ${cmd%% *} in
 
     #for local screenshots
     1.Normal_fullscreen)            scrot -d 1 "$FILEMASK" && notify-send -u low -t ${TIME} "Screenshot saved"  ;;
-    2.Delayed_fullscreen)           notify-send -u low -t $final_rounded_num "Screenshot in $COUNTER seconds" && sleep $COUNTER && scrot -d 1 "$FILEMASK" && notify-send -u low -t ${TIME} "Screenshot saved"  ;;
+    2.Delayed_fullscreen)           notify-send -u low -t $rounded_num "Screenshot in $COUNTER seconds" && sleep $COUNTER && scrot -d 1 "$FILEMASK" && notify-send -u low -t ${TIME} "Screenshot saved"  ;;
     3.Section)                      scrot -s "$FILEMASK" && notify-send -u low -t ${TIME} "Screenshot saved"    ;;
 
     #for screencasts
