@@ -4,7 +4,7 @@
 # Additional Ideas, testing and some code by Zeltak <zeltak at gmail dot com>
 #
 # Requirements:
-# dmenu, xclip, scrot, bc, some notification daemon
+# dmenu, scrot, bc, some notification daemon
 
 
 #changelog
@@ -20,6 +20,8 @@
 #added screencast function
 #v0.3
 #added 1.notifications 2.unique names for each type (for quick launch) 3.better photo editor (pinta) 4.dmenu title
+#v1.0
+#revamped by baitinq. Eliminated most of the depends, made it simpler to use.
 
 
 ############### Configuration options ##############################
@@ -28,62 +30,36 @@ IMG_PATH=$HOME/Images
 FILEMASK=%Y-%m-%d-@%H-%M-%S-screenshot.png
 RES=1920x1080   #set your screen resolution
 TIME=3          #How long will notifications be visible?
-COUNTER1=3      #Seconds to count for delay (Use $COUNTD variable)
-COUNTER2=6      #Seconds to count for delay (Use $COUNTD2 variable)
-
-
-#DMENU/DZEN2 CONFIGURATION
-FONT="Envy Code R-9"
-NF="#7c7c72"
-NB="#1a1a1a"
-SF="#FFFFFF"
-SB="#33B5E5"
-DZEN2_W=100     #Width of dzen2
-DZEN2_X=850     #X Padding
+COUNTER=3       #Seconds to count for delay
 
 ################## Configuration End ##############################
 
-
-# Needed for the countdown
-# Based on some script by  Marco Fontani - MFONTANI at cpan dot org
-set -bm
-COLOR='#7c7c72'
-function countdown () {
-    seq 1 ${1:-10} | tac | \
-        perl -ne'BEGIN{$|++;$msg=shift}$m=int($_/60);$s=int($_-$m*60);printf("$m:%02d -- $msg\n",$s);sleep 1;' \
-        "${2:-ready...}"
-}
-
-####Some Variables to clean up the code a bit
-COUNTD="countdown $COUNTER1 GO | dzen2 -fn \"$FONT\" -fg \"$NF\" -ta c -w \"$DZEN2_W\" -bg \"$NB\" -x \"$DZEN2_X\""
-COUNTD2="countdown $COUNTER2 GO | dzen2 -fn \"$FONT\" -fg \"$NF\" -ta c -w \"$DZEN2_W\" -bg \"$NB\" -x \"$DZEN2_X\""
-XCLIP="(xclip -o;echo) | xclip -selection clipboard"
-
-
-
 prog="
 ---Local screenshots (saved at IMG_PATH)---
-1.quick_fullscreen
-2.delayed_fullscreen
-3.section
----Screencasts
-c.cast
-k.kill_cast
+1.Normal_fullscreen
+2.Delayed_fullscreen
+3.Section
+---Recordings
+4.Cast
+5.Stop_cast
 "
 
 
-cmd=$(dmenu -l 10 -p 'Choose Screenshot Type'   <<< "$prog")
+cmd=$(dmenu -l 10 -p 'Choose Screenshot Type' <<< "$prog")
+
+(( rounded_num= ($COUNTER + (2 - 1) / 2))) #round the number
+((final_rounded_num = $rounded_num * 1000 )) #convert to seconds
 
 cd $IMG_PATH
 case ${cmd%% *} in
 
     #for local screenshots
-    1.quick_fullscreen)             scrot -d 1 "$FILEMASK" && notify-send -u low ${TIME} "Screenshot saved"  ;;
-    2.delayed_fullscreen)           eval $COUNTD & scrot -d $(echo $COUNTER1+1 | bc) "$FILEMASK" && notify-send -u low ${TIME} "Screenshot saved"     ;;
-    3.section)                      scrot -s "$FILEMASK" && notify-send -u low ${TIME} "Screenshot saved"    ;;
+    1.Normal_fullscreen)            scrot -d 1 "$FILEMASK" && notify-send -u low -t ${TIME} "Screenshot saved"  ;;
+    2.Delayed_fullscreen)           notify-send -u low -t $final_rounded_num "Screenshot in $COUNTER seconds" && sleep $COUNTER && scrot -d 1 "$FILEMASK" && notify-send -u low -t ${TIME} "Screenshot saved"  ;;
+    3.Section)                      scrot -s "$FILEMASK" && notify-send -u low -t ${TIME} "Screenshot saved"    ;;
 
     #for screencasts
-    4.cast)                         ffmpeg -r 25 -f x11grab -s $RES -i :0.0+0,0 -vcodec libx264 temp_cast.mkv && notify-send -u low ${TIME} "Screencast started"  ;;
-    5.kill_cast)                    kill $(pgrep -f x11grab) && sleep 3 && $UL temp_cast.mkv && rm -f temp_cast.mkv && eval $XCLIP && notify-send -u low ${TIME} "Screencast uploaded"  ;;
+    4.Cast)                         ffmpeg -r 25 -f x11grab -s $RES -i :0.0+0,0 -vcodec libx264 temp_cast.mkv && notify-send -u low -t ${TIME} "Screencast started"  ;;
+    5.Stop_cast)                    kill $(pgrep -f x11grab) && sleep 3 && notify-send -u low -t ${TIME} "Screencast stopped"  ;;
 	  *)		exec "'${cmd}'"  ;;
 esac
