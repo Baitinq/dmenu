@@ -1,0 +1,116 @@
+# HG changeset patch
+# User Michał Lemke <lemke.michal@gmail.com>
+# Date 1361752727 -3600
+# Node ID 9c3c66de76d74648b9e4b3e9e7f83d4cdde015f3
+# Parent  23d08e2d73f3087274da96bdcdc03f54076fb76b
+add options to change opacity, window class and window name
+
+diff --git a/README b/README
+--- a/README
++++ b/README
+@@ -1,7 +1,8 @@
+ dmenu - dynamic menu
+ ====================
+ dmenu is an efficient dynamic menu for X.
+-
++This version is fork of origal dmenu patched with XFT, quiet, x & y, token, follow focus, tab nav, filter.
++Also enables options to set screen on which dmenu apperars, as long as opacity, window class and window name.
+ 
+ Requirements
+ ------------
+diff --git a/dmenu.1 b/dmenu.1
+--- a/dmenu.1
++++ b/dmenu.1
+@@ -10,6 +10,12 @@
+ .RB [ \-t ]
+ .RB [ \-s
+ .IR screen ]
++.RB [ \-name
++.IR name ]
++.RB [ \-class
++.IR class ]
++.RB [ \-o
++.IR opacity ]
+ .RB [ \-l
+ .IR lines ]
+ .RB [ \-h
+@@ -66,6 +72,15 @@
+ .BI \-s " screen"
+ dmenu apears on the specified screen number. Number given corespondes to screen number in X configuration.
+ .TP
++.BI \-name " name"
++defines window name for dmenu. Defaults to "dmenu".
++.TP
++.BI \-class " class"
++defines window class for dmenu. Defaults to "Dmenu".
++.TP
++.BI \-o " opacity"
++defines window opacity for dmenu. Defaults to 1.0.
++.TP
+ .BI \-l " lines"
+ dmenu lists items vertically, with the given number of lines.
+ .TP
+diff --git a/dmenu.c b/dmenu.c
+--- a/dmenu.c
++++ b/dmenu.c
+@@ -54,6 +54,8 @@
+ static const char *normfgcolor = NULL;
+ static const char *selbgcolor  = NULL;
+ static const char *selfgcolor  = NULL;
++static char *name = "dmenu";
++static char *class = "Dmenu";
+ static unsigned int lines = 0, line_height = 0;
+ static int xoffset = 0;
+ static int yoffset = 0;
+@@ -75,6 +77,10 @@
+ static Item *prev, *curr, *next, *sel;
+ static Window win;
+ static XIC xic;
++static double opacity = 1.0;
++
++#define OPAQUE 0xffffffff
++#define OPACITY "_NET_WM_WINDOW_OPACITY"
+ 
+ static int (*fstrncmp)(const char *, const char *, size_t) = strncmp;
+ static char *(*fstrstr)(const char *, const char *) = strstr;
+@@ -120,7 +126,13 @@
+ 		else if(!strcmp(argv[i], "-h"))   /* minimum height of single line */
+ 			line_height = atoi(argv[++i]);
+ 		else if(!strcmp(argv[i], "-s"))   /* screen number for dmenu to appear in */
+-			snum = atoi(argv[++i]);			
++			snum = atoi(argv[++i]);
++		else if (!strcmp(argv[i], "-name")) /* dmenu window name */
++			name = argv[++i];
++		else if (!strcmp(argv[i], "-class")) /* dmenu window class */
++			class = argv[++i];
++		else if (!strcmp(argv[i], "-o"))  /* opacity */
++			opacity = atof(argv[++i]);
+ 		else if(!strcmp(argv[i], "-p"))   /* adds prompt to left of input field */
+ 			prompt = argv[++i];
+ 		else if(!strcmp(argv[i], "-fn"))  /* font or font set */
+@@ -753,6 +765,14 @@
+ 	                    DefaultDepth(dc->dpy, screen), CopyFromParent,
+ 	                    DefaultVisual(dc->dpy, screen),
+ 	                    CWOverrideRedirect | CWBackPixel | CWEventMask, &swa);
++  XClassHint hint = { .res_name = name, .res_class = class };
++  XSetClassHint(dc->dpy, win, &hint);
++
++  opacity = MIN(MAX(opacity, 0), 1);
++  unsigned int opacity_set = (unsigned int)(opacity * OPAQUE);
++  XChangeProperty(dc->dpy, win, XInternAtom(dc->dpy, OPACITY, False),
++											XA_CARDINAL, 32, PropModeReplace,
++											(unsigned char *) &opacity_set, 1L);
+ 
+ 	/* open input methods */
+ 	xim = XOpenIM(dc->dpy, NULL, NULL, NULL);
+@@ -766,7 +786,9 @@
+ 
+ void
+ usage(void) {
+-	fputs("usage: dmenu [-b] [-q] [-f] [-r] [-i] [-s screen] [-l lines] [-p prompt] [-fn font]\n"
++	fputs("usage: dmenu [-b] [-q] [-f] [-r] [-i] [-s screen]\n"
++				"             [-name name] [-class class] [ -o opacity]\n"
++				"             [-l lines] [-p prompt] [-fn font]\n"
+ 	      "             [-x xoffset] [-y yoffset] [-h height] [-w width]\n"
+ 	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-v]\n", stderr);
+ 	exit(EXIT_FAILURE);

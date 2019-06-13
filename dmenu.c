@@ -50,6 +50,9 @@ static Display *dpy;
 static Window root, parentwin, win;
 static XIC xic;
 
+#define OPAQUE 0xffffffff
+#define OPACITY "_NET_WM_WINDOW_OPACITY"
+
 static Drw *drw;
 static Clr *scheme[SchemeLast];
 
@@ -793,8 +796,9 @@ setup(void)
 	                    CopyFromParent, CopyFromParent, CopyFromParent,
 	                    CWOverrideRedirect | CWBackPixel | CWEventMask, &swa);
 	XSetClassHint(dpy, win, &ch);
-  XChangeProperty(dpy, win, type, XA_ATOM, 32, PropModeReplace,
-  (unsigned char *) &dock, 1);
+  opacity = MIN(MAX(opacity, 0), 1);
+  unsigned int opacity_set = (unsigned int)(opacity * OPAQUE);
+  XChangeProperty(dpy, win, XInternAtom(dpy, OPACITY, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &opacity_set, 1L);
 
 
 	/* input methods */
@@ -822,7 +826,7 @@ static void
 usage(void)
 {
 	fputs("usage: dmenu [-bfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
-	      "             [-h height]\n"
+				"             [-n name] [-c class] [ -o opacity] [-h height]\n"
 	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n", stderr);
 	exit(1);
 }
@@ -860,6 +864,12 @@ main(int argc, char *argv[])
       lineheight = atoi(argv[++i]);
       lineheight = MAX(lineheight,8); /* reasonable default in case of value too small/negative */
     }
+    else if (!strcmp(argv[i], "-n")) /* dmenu window name */
+      name = argv[++i];
+    else if (!strcmp(argv[i], "-c")) /* dmenu window class */
+      class = argv[++i];
+    else if (!strcmp(argv[i], "-o"))  /* opacity */
+      opacity = atof(argv[++i]);
 		else if (!strcmp(argv[i], "-nb"))  /* normal background color */
 			colors[SchemeNorm][ColBg] = argv[++i];
 		else if (!strcmp(argv[i], "-nf"))  /* normal foreground color */
