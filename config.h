@@ -21,7 +21,6 @@ static const char col_black[]       = "#000000";
 static const char col_aqua[]        = "#00ffff";
 
 static const unsigned int baralpha = 0xd0;
-static const unsigned int borderalpha = OPAQUE;
 
 static const char *colors[SchemeLast][2] = {
 	/*                  fg          bg   */
