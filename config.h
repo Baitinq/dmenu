@@ -20,13 +20,21 @@ static const char col_cyan[]        = "#005577";
 static const char col_black[]       = "#000000";
 static const char col_aqua[]        = "#00ffff";
 
-static double opacity = 1.0;         /* -o  option; 0 being transparent and 1 being opaque */
+static const unsigned int baralpha = 0xd0;
+static const unsigned int borderalpha = OPAQUE;
 
 static const char *colors[SchemeLast][2] = {
-	/*                  fg          bg    */
+	/*                  fg          bg   */
 	[SchemeNorm] = { col_gray3,  col_gray1},
-	[SchemeSel] =  { col_gray4,  col_cyan },
-	[SchemeOut] =  { col_black,  col_aqua },
+	[SchemeSel]  = { col_gray4,  col_cyan },
+	[SchemeOut]  = { col_black,  col_aqua },
+};
+
+static const unsigned int alphas[][2]      = {
+	/*                 fg       bg    */
+	[SchemeNorm] = { OPAQUE, baralpha },
+	[SchemeSel]  = { OPAQUE, baralpha },
+	[SchemeOut]  = { OPAQUE, baralpha },
 };
 /* -l option; if nonzero, dmenu uses vertical list with given number of lines */
 static unsigned int lines      = 0;
