@@ -54,7 +54,7 @@ case ${cmd%% *} in
 
     #for local screenshots
     1.Normal_fullscreen)            scrot -d 1 "$FILEMASK" && notify-send -u low -t ${TIME} "Screenshot saved"  ;;
-    2.Delayed_fullscreen)           notify-send -u low -t $rounded_num "Screenshot in $COUNTER seconds" && sleep $COUNTER && scrot -d 1 "$FILEMASK" && notify-send -u low -t ${TIME} "Screenshot saved"  ;;
+    2.Delayed_fullscreen)           notify-send -u low -t $rounded_num "Screenshot in $(($COUNTER / 1000)) seconds" && sleep $(($COUNTER / 1000)) && scrot -d 1 "$FILEMASK" && notify-send -u low -t ${TIME} "Screenshot saved"  ;;
     3.Section)                      scrot -s "$FILEMASK" && notify-send -u low -t ${TIME} "Screenshot saved"    ;;
 
     #for screencasts
