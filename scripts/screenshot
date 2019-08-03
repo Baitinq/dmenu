@@ -39,13 +39,13 @@ prog="
 1.Normal_fullscreen
 2.Delayed_fullscreen
 3.Section
----Recordings
+---Recordings---
 4.Cast
 5.Stop_cast
 "
 
 
-cmd=$(dmenu -l 10 -p 'Choose Screenshot Type' <<< "$prog")
+cmd=$(dmenu -l 8 -p 'Choose Screenshot Type' <<< "$prog")
 
 (( rounded_num= ($COUNTER + (2 - 1) / 2))) #round the number
 
